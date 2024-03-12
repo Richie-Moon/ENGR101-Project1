@@ -1,6 +1,5 @@
 #include <iostream> // input-output library
 #include <fstream>
-#include <string>
 #include <math.h>  // library for sin function
 #include <vector>  // if using vectors
 #include "wav.hpp" // make sure to include this helper library
@@ -8,37 +7,44 @@
 
 using namespace std;
 
-// BPM: 110
+// https://dsp.stackexchange.com/questions/46598/mathematical-equation-for-the-sound-wave-that-a-piano-makes
 
 int main(){
     int sample_rate = 44100; // samples per second, select value which provides good quality sound
-    double duration = 0.5; // how long [seconds] it will sound
+    double duration = 1.0; // how long [seconds] it will sound
     double n_samples = duration * sample_rate; // if sound is "duration" seconds long and there are "sample_rate" samples per second
     // - how many samples are there altogether? What type should this variable be?
     double dt = duration/n_samples; // time between samples
 
     vector<int> waveform;
 
-    int high_frequency = 1200; // pitch of the sound
-    int low_frequency = 700;
-    int volume = 6000;// 6000 is loud enough
+    double frequency = 261.63; // pitch of the sound
+    int volume = 20 ;
 
-    int cycles = 4; // number of high->low cycles
     const double pi = 3.1415926535;
-    for (int num_cycle = 0; num_cycle < cycles ; num_cycle++) {
-        for ( int i_sample = 0; i_sample < n_samples ; i_sample++){
-            waveform.push_back(volume * sin(2 * pi * high_frequency * i_sample * dt));
+    for ( int i_sample = 0; i_sample < n_samples ; i_sample++){
+
+        double time = i_sample * dt;
+        double exponential = exp(-0.0004 * 5 * pi * frequency * time);
+
+        double y = volume * sin(2 * pi * frequency * time) * exponential;
+
+        // Overtones
+        for (int i = 1; i < 6; i++) {
+            y += sin((i + 1) * 2 * pi * frequency * time) * exponential / pow(2, i);
         }
-        for ( int i_sample = 0; i_sample < n_samples ; i_sample++){
-            waveform.push_back(volume * sin(2 * pi * low_frequency * i_sample * dt));
-        }
+        // Saturation
+        y += y*y*y;
+        y *= 1 + 16 * time * exp(-6 * time);
+
+        waveform.push_back(y);
     }
 
     // generates sound file from waveform array, writes n_samples numbers
     // into sound wav file
     // should know sample_rate for sound timing
     // if using vector
-    MakeWavFromVector("ambulance.wav",sample_rate, waveform); //file name can be changed but keep extension .wav
+    MakeWavFromVector("piano.wav",sample_rate, waveform); //file name can be changed but keep extension .wav
 
     waveform.clear(); //if using vectors
     return 0;
