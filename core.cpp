@@ -18,10 +18,10 @@ int main(){
     std::vector<int> waveform;
     int frequency = 261; // pitch of the sound
     int volume = 6000;// 6000 is loud enough
+    const double pi = 3.1415926535;
 
     for ( int i_sample = 0; i_sample < n_samples ; i_sample++){
         // if using vector
-        const double pi = 3.1415926535;
         waveform.push_back(volume * sin(2 * pi * frequency * i_sample * dt));
         //cout can be used here to check values of "waveform"
         cout << waveform[i_sample] << endl;
